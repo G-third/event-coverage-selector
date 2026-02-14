@@ -387,6 +387,55 @@
             { p: '0880', s: 'Nhulunbuy', st: 'NT' }, { p: '0886', s: 'Jabiru', st: 'NT' }
         ];
 
+        const MOCK_SERVICES = [
+            { id: 'RCH-001', name: 'Sunrise Gardens Aged Care', suburb: 'Parramatta', state: 'NSW', postcode: '2150', acprId: '115', status: 'No Event' },
+            { id: 'RCH-002', name: 'Harbour View Residency', suburb: 'Newcastle', state: 'NSW', postcode: '2300', acprId: '103', status: 'Active Event' },
+            { id: 'RCH-003', name: 'Blue Mountains Manor', suburb: 'Katoomba', state: 'NSW', postcode: '2780', acprId: '107', status: 'Active Event' },
+            { id: 'RCH-004', name: 'Victoria Heights Care', suburb: 'Melbourne', state: 'VIC', postcode: '3000', acprId: '206', status: 'No Event' },
+            { id: 'RCH-005', name: 'Geelong Community Home', suburb: 'Geelong', state: 'VIC', postcode: '3220', acprId: '201', status: 'No Event' },
+            { id: 'RCH-006', name: 'Sunnybank Senior Living', suburb: 'Sunnybank', state: 'QLD', postcode: '4109', acprId: '302', status: 'No Event' },
+            { id: 'RCH-007', name: 'Gold Coast Retreat', suburb: 'Southport', state: 'QLD', postcode: '4215', acprId: '308', status: 'Active Event' },
+            { id: 'RCH-008', name: 'Perth City Aged Care', suburb: 'Perth', state: 'WA', postcode: '6000', acprId: '405', status: 'No Event' },
+            { id: 'RCH-009', name: 'Adelaide Hills Lodge', suburb: 'Mount Barker', state: 'SA', postcode: '5251', acprId: '503', status: 'No Event' },
+            { id: 'RCH-010', name: 'Hobart Haven', suburb: 'Hobart', state: 'TAS', postcode: '7000', acprId: '603', status: 'Active Event' },
+            { id: 'RCH-011', name: 'Canberra Capital Care', suburb: 'Canberra', state: 'ACT', postcode: '2600', acprId: '701', status: 'No Event' },
+            { id: 'RCH-012', name: 'Darwin Tropical Gardens', suburb: 'Darwin', state: 'NT', postcode: '0800', acprId: '803', status: 'Active Event' },
+            { id: 'RCH-013', name: 'Alice Springs Desert Home', suburb: 'Alice Springs', state: 'NT', postcode: '0870', acprId: '801', status: 'No Event' },
+            { id: 'RCH-014', name: 'Surry Hills Assisted Living', suburb: 'Surry Hills', state: 'NSW', postcode: '2010', acprId: '112', status: 'No Event' },
+            { id: 'RCH-015', name: 'Bondi Beach Care', suburb: 'Bondi', state: 'NSW', postcode: '2026', acprId: '112', status: 'No Event' },
+            // New entries
+            { id: 'RCH-016', name: 'Wollongong Coastal Care', suburb: 'Wollongong', state: 'NSW', postcode: '2500', acprId: '104', status: 'Active Event' },
+            { id: 'RCH-017', name: 'Dubbo Western Plains', suburb: 'Dubbo', state: 'NSW', postcode: '2830', acprId: '110', status: 'No Event' },
+            { id: 'RCH-018', name: 'Ballarat Goldfields Home', suburb: 'Ballarat', state: 'VIC', postcode: '3350', acprId: '203', status: 'No Event' },
+            { id: 'RCH-019', name: 'Bendigo Heritage Care', suburb: 'Bendigo', state: 'VIC', postcode: '3550', acprId: '205', status: 'Active Event' },
+            { id: 'RCH-020', name: 'Toowoomba Garden City', suburb: 'Toowoomba', state: 'QLD', postcode: '4350', acprId: '305', status: 'No Event' },
+            { id: 'RCH-021', name: 'Cairns Tropical Living', suburb: 'Cairns', state: 'QLD', postcode: '4870', acprId: '306', status: 'Active Event' },
+            { id: 'RCH-022', name: 'Fremantle Port Care', suburb: 'Fremantle', state: 'WA', postcode: '6160', acprId: '407', status: 'No Event' },
+            { id: 'RCH-023', name: 'Broome Pearl Coast', suburb: 'Broome', state: 'WA', postcode: '6725', acprId: '403', status: 'Active Event' },
+            { id: 'RCH-024', name: 'Barossa Valley Views', suburb: 'Tanunda', state: 'SA', postcode: '5371', acprId: '510', status: 'No Event' },
+            { id: 'RCH-025', name: 'Launceston Tamar Valley', suburb: 'Launceston', state: 'TAS', postcode: '7250', acprId: '602', status: 'No Event' },
+            { id: 'RCH-026', name: 'Belconnen Lakeview', suburb: 'Belconnen', state: 'ACT', postcode: '2617', acprId: '701', status: 'No Event' },
+            { id: 'RCH-027', name: 'Katherine River Care', suburb: 'Katherine', state: 'NT', postcode: '0850', acprId: '805', status: 'No Event' },
+            { id: 'RCH-028', name: 'Chatswood North Shore', suburb: 'Chatswood', state: 'NSW', postcode: '2067', acprId: '109', status: 'No Event' },
+            { id: 'RCH-029', name: 'Cronulla Beachside', suburb: 'Cronulla', state: 'NSW', postcode: '2230', acprId: '112', status: 'Active Event' },
+            { id: 'RCH-030', name: 'Penrith Nepean Valley', suburb: 'Penrith', state: 'NSW', postcode: '2750', acprId: '107', status: 'No Event' },
+            { id: 'RCH-031', name: 'St Kilda Bayside', suburb: 'St Kilda', state: 'VIC', postcode: '3182', acprId: '208', status: 'No Event' },
+            { id: 'RCH-032', name: 'Preston Northern Care', suburb: 'Preston', state: 'VIC', postcode: '3072', acprId: '206', status: 'No Event' },
+            { id: 'RCH-033', name: 'Frankston Peninsula', suburb: 'Frankston', state: 'VIC', postcode: '3199', acprId: '208', status: 'Active Event' },
+            { id: 'RCH-034', name: 'Mackay Sugar City', suburb: 'Mackay', state: 'QLD', postcode: '4740', acprId: '309', status: 'No Event' },
+            { id: 'RCH-035', name: 'Rockhampton Beef Capital', suburb: 'Rockhampton', state: 'QLD', postcode: '4700', acprId: '307', status: 'No Event' },
+            { id: 'RCH-036', name: 'Townsville Strand Care', suburb: 'Townsville', state: 'QLD', postcode: '4810', acprId: '311', status: 'Active Event' },
+            { id: 'RCH-037', name: 'Albany Southern Ocean', suburb: 'Albany', state: 'WA', postcode: '6330', acprId: '402', status: 'No Event' },
+            { id: 'RCH-038', name: 'Kalgoorlie Goldfields', suburb: 'Kalgoorlie', state: 'WA', postcode: '6430', acprId: '401', status: 'No Event' },
+            { id: 'RCH-039', name: 'Port Lincoln Eyre', suburb: 'Port Lincoln', state: 'SA', postcode: '5606', acprId: '501', status: 'No Event' },
+            { id: 'RCH-040', name: 'Mount Gambier Blue Lake', suburb: 'Mount Gambier', state: 'SA', postcode: '5290', acprId: '509', status: 'No Event' },
+            { id: 'RCH-041', name: 'Devonport Spirit', suburb: 'Devonport', state: 'TAS', postcode: '7310', acprId: '601', status: 'No Event' },
+            { id: 'RCH-042', name: 'Tuggeranong Valley', suburb: 'Tuggeranong', state: 'ACT', postcode: '2900', acprId: '701', status: 'Active Event' },
+            { id: 'RCH-043', name: 'Palmerston Gateway', suburb: 'Palmerston', state: 'NT', postcode: '0830', acprId: '803', status: 'No Event' },
+            { id: 'RCH-044', name: 'Liverpool South West', suburb: 'Liverpool', state: 'NSW', postcode: '2170', acprId: '113', status: 'No Event' },
+            { id: 'RCH-045', name: 'Blacktown Western Care', suburb: 'Blacktown', state: 'NSW', postcode: '2148', acprId: '115', status: 'Active Event' },
+        ];
+
         function RegionalSelector() {
             const [isNationwide, setIsNationwide] = useState(false);
             const [selectedStates, setSelectedStates] = useState([]);
@@ -398,6 +447,15 @@
 
             // New state for ACPR search
             const [acprSearch, setAcprSearch] = useState('');
+            
+            // New state for Event Details
+            const [eventType, setEventType] = useState('');
+            const [eventDescription, setEventDescription] = useState('');
+            const [placeholderField, setPlaceholderField] = useState('');
+
+            // New state for Services Table
+            const [showTable, setShowTable] = useState(false);
+            const [matchedServices, setMatchedServices] = useState([]);
 
             // --- Logic: Redundancy Handling ---
 
@@ -440,6 +498,28 @@
 
             const removeSuburb = (suburbString) => {
                 setSelectedSuburbs(prev => prev.filter(s => `${s.s} ${s.p}` !== suburbString));
+            };
+
+            // 4. Show Services Logic
+            const handleShowServices = () => {
+                if (isNationwide) {
+                    setMatchedServices(MOCK_SERVICES);
+                } else {
+                    const results = MOCK_SERVICES.filter(service => {
+                        // Check State Match
+                        if (selectedStates.includes(service.state)) return true;
+                        
+                        // Check ACPR Match
+                        if (selectedAcprs.some(a => a.id === service.acprId)) return true;
+
+                        // Check Suburb Match
+                        if (selectedSuburbs.some(s => s.s === service.suburb && s.p === service.postcode)) return true;
+
+                        return false;
+                    });
+                    setMatchedServices(results);
+                }
+                setShowTable(true);
             };
 
             // ACPR Filtering and Sorting Logic
@@ -485,24 +565,81 @@
                     setSelectedStates([]);
                     setSelectedAcprs([]);
                     setSelectedSuburbs([]);
+                    setShowTable(false);
                 }
             };
 
             return (
-                <div className="max-w-4xl mx-auto p-6 bg-slate-50 min-h-screen font-sans text-slate-900">
+                <div className="max-w-5xl mx-auto p-6 bg-slate-50 min-h-screen font-sans text-slate-900">
                     
+                    {/* Top Header */}
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-slate-900 mb-2">Event Coverage Selector</h1>
+                        <p className="text-slate-600 text-lg">
+                            Create event details, define geographic coverage, and generate a report once reviewed and confirmed.
+                        </p>
+                    </div>
+
+                    {/* Event Details Fieldset */}
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-300 overflow-hidden mb-8">
+                        <div className="px-6 py-4 border-b border-slate-300 bg-slate-100">
+                            <h2 className="text-lg font-semibold text-slate-900">Event Details</h2>
+                        </div>
+                        <div className="p-6 grid grid-cols-1 gap-5">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    Event Type <span className="text-red-500">*</span>
+                                </label>
+                                <select 
+                                    value={eventType}
+                                    onChange={(e) => setEventType(e.target.value)}
+                                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                                >
+                                    <option value="">Select Event Type</option>
+                                    {[1, 2, 3, 4, 5, 6].map(n => (
+                                        <option key={n} value={`Type ${n}`}>Event Type {n}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    Description <span className="text-slate-400 font-normal">(Optional)</span>
+                                </label>
+                                <textarea 
+                                    value={eventDescription}
+                                    onChange={(e) => setEventDescription(e.target.value)}
+                                    rows="3"
+                                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    placeholder="Enter event description..."
+                                ></textarea>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    Placeholder field <span className="text-slate-400 font-normal">(Optional)</span>
+                                </label>
+                                <input 
+                                    type="text"
+                                    value={placeholderField}
+                                    onChange={(e) => setPlaceholderField(e.target.value)}
+                                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="bg-white rounded-xl shadow-sm border border-slate-300 overflow-hidden">
-                        {/* Header */}
+                        {/* Coverage Header */}
                         <div className="px-6 py-4 border-b border-slate-300 bg-slate-100 flex justify-between items-center">
                             <div>
-                                <h2 className="text-lg font-semibold text-slate-900">Regional Coverage Selector</h2>
-                                <p className="text-sm text-slate-600">Define geographic parameters for report generation.</p>
+                                <h2 className="text-lg font-semibold text-slate-900">Define Coverage of Event</h2>
                             </div>
                             
                             {/* Nationwide Toggle */}
                             <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-slate-400 shadow-sm">
                                 <span className={`text-sm font-medium ${isNationwide ? 'text-blue-700' : 'text-slate-700'}`}>
-                                    Nationwide (All Australia)
+                                    Nationwide
                                 </span>
                                 <button 
                                     onClick={handleNationwideChange}
@@ -514,14 +651,14 @@
                         </div>
 
                         {/* Main Interface Body */}
-                        <div className={`p-6 grid grid-cols-1 md:grid-cols-12 gap-6 relative transition-opacity duration-200 ${isNationwide ? 'opacity-50 pointer-events-none select-none' : 'opacity-100'}`}>
+                        <div className={`p-6 grid grid-cols-1 md:grid-cols-3 gap-6 relative transition-opacity duration-200 ${isNationwide ? 'opacity-50 pointer-events-none select-none' : 'opacity-100'}`}>
                             
                             {/* Column 1: States */}
-                            <div className="md:col-span-3 border-r border-slate-300 pr-4">
-                                <h3 className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-2">
-                                    <MapIcon size={14} /> 1. State / Territory
+                            <div className="pr-4">
+                                <h3 className="text-base font-bold text-slate-900 mb-3">
+                                    1. State / Territory
                                 </h3>
-                                <div className="space-y-2">
+                                <div className="space-y-0.25">
                                     {MOCK_STATES.map(state => {
                                         const isSelected = selectedStates.includes(state.code);
                                         const isPartial = !isSelected && partialStates.has(state.code);
@@ -536,7 +673,7 @@
                                                             : 'hover:bg-slate-50 border border-transparent'
                                                     }`}
                                                 >
-                                                    <span className="flex items-center gap-2 text-slate-800">
+                                                    <span className="flex items-center gap-2 text-slate-900">
                                                         <div className={`w-4 h-4 rounded border flex items-center justify-center ${
                                                             isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-400 bg-white'
                                                         }`}>
@@ -554,9 +691,9 @@
                             </div>
 
                             {/* Column 2: ACPRs */}
-                            <div className="md:col-span-4 border-r border-slate-300 px-4">
-                                <h3 className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-2">
-                                    <MapPin size={14} /> 2. Aged Care Planning Region
+                            <div className="px-4 flex flex-col">
+                                <h3 className="text-base font-bold text-slate-900 mb-3">
+                                    2. Aged Care Planning Region
                                 </h3>
 
                                 {/* ACPR Search Input */}
@@ -566,19 +703,21 @@
                                         value={acprSearch}
                                         onChange={(e) => setAcprSearch(e.target.value)}
                                         placeholder="Search Regions..."
-                                        className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-400 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-800 placeholder-slate-500"
+                                        className="w-full pl-8 pr-3 py-2 text-sm border border-slate-400 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-900 placeholder-slate-500"
                                     />
-                                    <Search size={14} className="absolute left-2.5 top-2 text-slate-500" />
+                                    <Search size={14} className="absolute left-2.5 top-3 text-slate-500" />
                                 </div>
-                                
-                                <div className="bg-white border border-slate-300 rounded-lg h-[280px] overflow-y-auto">
+                                <div className="relative mb-2">
+                                    <p className="text-xs text-slate-500 mt-2">Selection includes all suburbs within region.</p>
+                                </div>
+                                <div className="bg-white border border-slate-300 rounded-lg h-[260px] overflow-y-auto">
                                     {filteredAcprs.map(acpr => {
                                         const isParentStateSelected = selectedStates.includes(acpr.state);
                                         const isSelected = selectedAcprs.some(a => a.id === acpr.id);
                                         
                                         if (isParentStateSelected) {
                                             return (
-                                                <div key={acpr.id} className="p-2 text-sm text-slate-500 italic bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                                                <div key={acpr.id} className="p-2 text-sm text-slate-600 italic bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                                                     {acpr.label}
                                                     <span className="text-xs">Included in {acpr.state}</span>
                                                 </div>
@@ -589,9 +728,9 @@
                                             <button
                                                 key={acpr.id}
                                                 onClick={() => toggleAcpr(acpr)}
-                                                className={`w-full text-left p-2 border-b border-slate-200 text-sm flex items-center justify-between hover:bg-slate-50 ${isSelected ? 'bg-indigo-50 text-indigo-800' : 'text-slate-800'}`}
+                                                className={`w-full text-left p-2 border-b border-slate-200 text-sm flex items-center justify-between hover:bg-slate-50 ${isSelected ? 'bg-indigo-50 text-indigo-800' : 'text-slate-900'}`}
                                             >
-                                                <span>{acpr.label} <span className="text-slate-500 ml-1">({acpr.state})</span></span>
+                                                <span>{acpr.label} <span className="text-slate-600 ml-1">({acpr.state})</span></span>
                                                 {isSelected && <Check size={14} className="text-indigo-600" />}
                                             </button>
                                         );
@@ -602,23 +741,24 @@
                                         </div>
                                     )}
                                 </div>
-                                <p className="text-xs text-slate-500 mt-2">Selection includes all suburbs within region.</p>
+                                
                             </div>
 
                             {/* Column 3: Suburbs/Postcodes */}
-                            <div className="md:col-span-5 pl-4">
-                                <h3 className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-2">
-                                    <MapPin size={14} /> 3. Suburb / Postcode
+                            <div className="pl-4">
+                                <h3 className="text-base font-bold text-slate-900 mb-3">
+                                    3. Suburb / Postcode
                                 </h3>
                                 
                                 <div className="relative">
                                     <input 
                                         type="text" 
                                         placeholder="Search Suburb or Postcode..." 
-                                        className="w-full border border-slate-400 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-800 placeholder-slate-500"
+                                        className="w-full border border-slate-400 rounded-md pl-8 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-900 placeholder-slate-500"
                                         value={suburbInput}
                                         onChange={(e) => setSuburbInput(e.target.value)}
                                     />
+                                    <Search size={14} className="absolute left-2.5 top-3 text-slate-500" />
                                     
                                     {/* Autocomplete Dropdown */}
                                     {(filteredSuburbs.length > 0 || (suburbInput.length >= 2 && filteredSuburbs.length === 0)) && (
@@ -633,10 +773,10 @@
                                                             key={`${sub.p}-${sub.s}-${idx}`}
                                                             disabled={isParentStateSelected}
                                                             onClick={() => addSuburb(sub)}
-                                                            className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 border-b border-slate-200 last:border-0 flex justify-between ${isParentStateSelected ? 'opacity-50 cursor-not-allowed bg-slate-50 text-slate-500' : 'text-slate-800'}`}
+                                                            className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 border-b border-slate-200 last:border-0 flex justify-between ${isParentStateSelected ? 'opacity-50 cursor-not-allowed bg-slate-50 text-slate-600' : 'text-slate-900'}`}
                                                         >
                                                             <span>{sub.s}, {sub.st} {sub.p}</span>
-                                                            {isParentStateSelected && <span className="text-xs text-slate-500">Included in State</span>}
+                                                            {isParentStateSelected && <span className="text-xs text-slate-600">Included in State</span>}
                                                         </button>
                                                     )
                                                 })
@@ -647,16 +787,9 @@
 
                                 <div className="mt-4 max-h-[260px] overflow-y-auto pr-2">
                                     {/* Suburb List Display */}
-                                    {selectedSuburbs.length === 0 && (
-                                        <div className="text-sm text-slate-500 text-center py-8 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center gap-2">
-                                            <Database size={24} className="text-slate-400" />
-                                            <span>No individual suburbs selected.</span>
-                                            <span className="text-xs text-slate-400">Test DB contains ~350 suburbs</span>
-                                        </div>
-                                    )}
                                     <div className="flex flex-wrap gap-2">
                                         {selectedSuburbs.map((s, idx) => (
-                                            <span key={`${s.s}-${s.p}`} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-400 text-slate-800 shadow-sm">
+                                            <span key={`${s.s}-${s.p}`} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-400 text-slate-900 shadow-sm">
                                                 {s.s} {s.p}
                                                 <button onClick={() => removeSuburb(`${s.s} ${s.p}`)} className="text-slate-500 hover:text-red-600 transition-colors">
                                                     <X size={12} />
@@ -668,13 +801,13 @@
                             </div>
                         </div>
 
-                        {/* Footer / Results Summary */}
-                        <div className="bg-slate-800 text-slate-200 p-6">
-                            <h3 className="text-xs font-bold text-slate-400 mb-4">Final Selection Output</h3>
+                        {/* Coverage Footer / Results Summary */}
+                        <div className="bg-slate-100 border-t border-slate-300 p-6">
+                            <h3 className="text-base font-bold text-slate-900 mb-4">Final Selection Output</h3>
                             
-                            <div className="bg-slate-900 rounded-lg p-4 border border-slate-600 min-h-[100px]">
+                            <div className="bg-white rounded-lg p-4 border border-slate-300 min-h-[100px]">
                                 {isNationwide ? (
-                                    <div className="flex items-center justify-between gap-3 text-green-400 font-medium p-2 bg-slate-800/50 rounded border border-green-900">
+                                    <div className="flex items-center justify-between gap-3 text-green-800 font-medium p-2 bg-green-50 rounded border border-green-200">
                                         <div className="flex items-center gap-2">
                                             <Globe size={20} />
                                             <span>Nationwide (All States, Territories, and Regions included)</span>
@@ -691,12 +824,12 @@
                                         {/* 1. Full States */}
                                         {selectedStates.length > 0 && (
                                             <div>
-                                                <span className="text-slate-400 text-xs block mb-1">States / Territories (Full Coverage):</span>
+                                                <span className="text-slate-600 text-xs block mb-1">States / Territories (Full Coverage):</span>
                                                 <div className="flex flex-wrap gap-2">
                                                     {selectedStates.map(code => (
-                                                        <span key={code} className="bg-blue-900 text-blue-100 border border-blue-600 px-3 py-1 rounded text-sm font-medium flex items-center gap-2">
+                                                        <span key={code} className="bg-blue-100 text-blue-800 border border-blue-200 px-3 py-1 rounded text-sm font-medium flex items-center gap-2">
                                                             {MOCK_STATES.find(s => s.code === code)?.label}
-                                                            <button onClick={() => toggleState(code)} className="hover:text-white text-blue-300 transition-colors">
+                                                            <button onClick={() => toggleState(code)} className="hover:text-blue-900 text-blue-500 transition-colors">
                                                                 <X size={14} />
                                                             </button>
                                                         </span>
@@ -708,12 +841,12 @@
                                         {/* 2. ACPRs */}
                                         {selectedAcprs.length > 0 && (
                                             <div>
-                                                <span className="text-slate-400 text-xs block mb-1">Aged Care Planning Regions:</span>
+                                                <span className="text-slate-600 text-xs block mb-1">Aged Care Planning Regions:</span>
                                                 <div className="flex flex-wrap gap-2">
                                                     {selectedAcprs.map(acpr => (
-                                                        <span key={acpr.id} className="bg-indigo-900 text-indigo-100 border border-indigo-600 px-3 py-1 rounded text-sm font-medium flex items-center gap-2">
+                                                        <span key={acpr.id} className="bg-indigo-100 text-indigo-800 border border-indigo-200 px-3 py-1 rounded text-sm font-medium flex items-center gap-2">
                                                             {acpr.label} ({acpr.state})
-                                                            <button onClick={() => toggleAcpr(acpr)} className="hover:text-white text-indigo-300 transition-colors">
+                                                            <button onClick={() => toggleAcpr(acpr)} className="hover:text-indigo-900 text-indigo-500 transition-colors">
                                                                 <X size={14} />
                                                             </button>
                                                         </span>
@@ -725,12 +858,12 @@
                                         {/* 3. Suburbs */}
                                         {selectedSuburbs.length > 0 && (
                                             <div>
-                                                <span className="text-slate-400 text-xs block mb-1">Individual Locations:</span>
+                                                <span className="text-slate-600 text-xs block mb-1">Individual Locations:</span>
                                                 <div className="flex flex-wrap gap-2">
                                                     {selectedSuburbs.map((sub, idx) => (
-                                                        <span key={idx} className="bg-slate-700 text-slate-100 border border-slate-500 px-3 py-1 rounded text-sm font-medium flex items-center gap-2">
+                                                        <span key={idx} className="bg-white text-slate-800 border border-slate-300 px-3 py-1 rounded text-sm font-medium flex items-center gap-2">
                                                             {sub.s}, {sub.st} {sub.p}
-                                                            <button onClick={() => removeSuburb(`${sub.s} ${sub.p}`)} className="hover:text-white text-slate-400 transition-colors">
+                                                            <button onClick={() => removeSuburb(`${sub.s} ${sub.p}`)} className="hover:text-red-600 text-slate-400 transition-colors">
                                                                 <X size={14} />
                                                             </button>
                                                         </span>
@@ -742,8 +875,68 @@
                                     </div>
                                 )}
                             </div>
+
+                            {/* Action Button */}
+                            <div className="mt-6 flex justify-end">
+                                <button 
+                                    onClick={handleShowServices}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md shadow-sm transition-colors flex items-center gap-2"
+                                >
+                                    <Database size={18} />
+                                    Show Services Covered
+                                </button>
+                            </div>
                         </div>
                     </div>
+
+                    {/* Services Table Section */}
+                    {showTable && (
+                        <div className="mt-8 bg-white rounded-xl shadow-sm border border-slate-300 overflow-hidden animate-fade-in">
+                            <div className="px-6 py-4 border-b border-slate-300 bg-slate-100 flex justify-between items-center">
+                                <h2 className="text-lg font-semibold text-slate-900">Services Covered</h2>
+                                <span className="text-sm text-slate-600 bg-white px-3 py-1 rounded border border-slate-300">
+                                    {matchedServices.length} Services Found
+                                </span>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm text-slate-600">
+                                    <thead className="bg-slate-50 text-slate-900 font-semibold border-b border-slate-200">
+                                        <tr>
+                                            <th className="px-6 py-3">ID</th>
+                                            <th className="px-6 py-3">Site Name</th>
+                                            <th className="px-6 py-3">Suburb / State</th>
+                                            <th className="px-6 py-3">Event Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-200">
+                                        {matchedServices.length > 0 ? (
+                                            matchedServices.map((service) => (
+                                                <tr key={service.id} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="px-6 py-3 font-mono text-slate-500">{service.id}</td>
+                                                    <td className="px-6 py-3 font-medium text-slate-900">{service.name}</td>
+                                                    <td className="px-6 py-3">{service.suburb}, {service.state}</td>
+                                                    <td className="px-6 py-3">
+                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                            service.status === 'Active Event' ? 'bg-red-100 text-red-800' :
+                                                            'bg-gray-100 text-gray-800'
+                                                        }`}>
+                                                            {service.status}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="4" className="px-6 py-8 text-center text-slate-500 italic">
+                                                    No services found in the selected coverage areas.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
