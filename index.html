@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Coverage Selector</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+
+        // --- Icon Components (Replacing Lucide-React imports) ---
+        const IconBase = ({ size = 24, className = "", children }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+        const Check = (props) => <IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>;
+        const X = (props) => <IconBase {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></IconBase>;
+        const MapIcon = (props) => <IconBase {...props}><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></IconBase>;
+        const MapPin = (props) => <IconBase {...props}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></IconBase>;
+        const Globe = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></IconBase>;
+        const Database = (props) => <IconBase {...props}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></IconBase>;
+        const Search = (props) => <IconBase {...props}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></IconBase>;
+
+
+        // --- Data Sets ---
+        const MOCK_STATES = [
+            { code: 'NSW', label: 'New South Wales' },
+            { code: 'VIC', label: 'Victoria' },
+            { code: 'QLD', label: 'Queensland' },
+            { code: 'WA',  label: 'Western Australia' },
+            { code: 'SA',  label: 'South Australia' },
+            { code: 'TAS', label: 'Tasmania' },
+            { code: 'ACT', label: 'Australian Capital Territory' },
+            { code: 'NT',  label: 'Northern Territory' },
+            { code: 'OT',  label: 'Other Territories' },
+        ];
+
+        const ALL_ACPRS = [
+             // NSW (15)
+            { id: '101', label: 'Central West', state: 'NSW' },
+            { id: '102', label: 'Far North Coast', state: 'NSW' },
+            { id: '103', label: 'Hunter', state: 'NSW' },
+            { id: '104', label: 'Illawarra', state: 'NSW' },
+            { id: '105', label: 'Inner West', state: 'NSW' },
+            { id: '106', label: 'Mid North Coast', state: 'NSW' },
+            { id: '107', label: 'Nepean', state: 'NSW' },
+            { id: '108', label: 'New England', state: 'NSW' },
+            { id: '109', label: 'Northern Sydney', state: 'NSW' },
+            { id: '110', label: 'Orana Far West', state: 'NSW' },
+            { id: '111', label: 'Riverina/Murray', state: 'NSW' },
+            { id: '112', label: 'South East Sydney', state: 'NSW' },
+            { id: '113', label: 'South West Sydney', state: 'NSW' },
+            { id: '114', label: 'Southern Highlands', state: 'NSW' },
+            { id: '115', label: 'Western Sydney', state: 'NSW' },
+            // VIC (9)
+            { id: '201', label: 'Barwon-South Western', state: 'VIC' },
+            { id: '202', label: 'Gippsland', state: 'VIC' },
+            { id: '203', label: 'Grampians', state: 'VIC' },
+            { id: '204', label: 'Hume', state: 'VIC' },
+            { id: '205', label: 'Loddon-Mallee', state: 'VIC' },
+            { id: '206', label: 'Northern Metro', state: 'VIC' },
+            { id: '207', label: 'Eastern Metro', state: 'VIC' },
+            { id: '208', label: 'Southern Metro', state: 'VIC' },
+            { id: '209', label: 'Western Metro', state: 'VIC' },
+            // QLD (15)
+            { id: '301', label: 'Brisbane North', state: 'QLD' },
+            { id: '302', label: 'Brisbane South', state: 'QLD' },
+            { id: '303', label: 'Caboolture/Strathpine', state: 'QLD' },
+            { id: '304', label: 'Central West', state: 'QLD' },
+            { id: '305', label: 'Darling Downs', state: 'QLD' },
+            { id: '306', label: 'Far North', state: 'QLD' },
+            { id: '307', label: 'Fitzroy', state: 'QLD' },
+            { id: '308', label: 'Gold Coast', state: 'QLD' },
+            { id: '309', label: 'Mackay', state: 'QLD' },
+            { id: '310', label: 'North West', state: 'QLD' },
+            { id: '311', label: 'Northern', state: 'QLD' },
+            { id: '312', label: 'South West', state: 'QLD' },
+            { id: '313', label: 'Sunshine Coast', state: 'QLD' },
+            { id: '314', label: 'West Moreton', state: 'QLD' },
+            { id: '315', label: 'Wide Bay', state: 'QLD' },
+            // WA (11)
+            { id: '401', label: 'Goldfields', state: 'WA' },
+            { id: '402', label: 'Great Southern', state: 'WA' },
+            { id: '403', label: 'Kimberley', state: 'WA' },
+            { id: '404', label: 'Metropolitan East', state: 'WA' },
+            { id: '405', label: 'Metropolitan North', state: 'WA' },
+            { id: '406', label: 'Metropolitan South East', state: 'WA' },
+            { id: '407', label: 'Metropolitan South West', state: 'WA' },
+            { id: '408', label: 'Midwest', state: 'WA' },
+            { id: '409', label: 'Pilbara', state: 'WA' },
+            { id: '410', label: 'South West', state: 'WA' },
+            { id: '411', label: 'Wheatbelt', state: 'WA' },
+            // SA (10)
+            { id: '501', label: 'Eyre Peninsula', state: 'SA' },
+            { id: '502', label: 'Flinders/Far North', state: 'SA' },
+            { id: '503', label: 'Hills Mallee Southern', state: 'SA' },
+            { id: '504', label: 'Metropolitan East', state: 'SA' },
+            { id: '505', label: 'Metropolitan North', state: 'SA' },
+            { id: '506', label: 'Metropolitan South', state: 'SA' },
+            { id: '507', label: 'Metropolitan West', state: 'SA' },
+            { id: '508', label: 'Riverland', state: 'SA' },
+            { id: '509', label: 'South East', state: 'SA' },
+            { id: '510', label: 'Yorke, Lower North, Barossa', state: 'SA' },
+            // TAS (3)
+            { id: '601', label: 'North Western', state: 'TAS' },
+            { id: '602', label: 'Northern', state: 'TAS' },
+            { id: '603', label: 'Southern', state: 'TAS' },
+            // ACT (1)
+            { id: '701', label: 'ACT', state: 'ACT' },
+            // NT (5)
+            { id: '801', label: 'Alice Springs', state: 'NT' },
+            { id: '802', label: 'Barkly', state: 'NT' },
+            { id: '803', label: 'Darwin', state: 'NT' },
+            { id: '804', label: 'East Arnhem', state: 'NT' },
+            { id: '805', label: 'Katherine', state: 'NT' },
+            // Other Territories (3)
+            { id: '901', label: 'Norfolk Island', state: 'OT' },
+            { id: '902', label: 'Christmas Island', state: 'OT' },
+            { id: '903', label: 'Cocos (Keeling) Islands', state: 'OT' },
+        ];
+
+        const EXTENDED_SUBURBS = [
+            // NSW - Sydney Metro
+            { p: '2000', s: 'Sydney', st: 'NSW' }, { p: '2000', s: 'Barangaroo', st: 'NSW' },
+            { p: '2007', s: 'Ultimo', st: 'NSW' }, { p: '2008', s: 'Chippendale', st: 'NSW' },
+            { p: '2010', s: 'Surry Hills', st: 'NSW' }, { p: '2010', s: 'Darlinghurst', st: 'NSW' },
+            { p: '2011', s: 'Potts Point', st: 'NSW' }, { p: '2015', s: 'Alexandria', st: 'NSW' },
+            { p: '2016', s: 'Redfern', st: 'NSW' }, { p: '2017', s: 'Waterloo', st: 'NSW' },
+            { p: '2018', s: 'Rosebery', st: 'NSW' }, { p: '2019', s: 'Botany', st: 'NSW' },
+            { p: '2020', s: 'Mascot', st: 'NSW' }, { p: '2021', s: 'Paddington', st: 'NSW' },
+            { p: '2022', s: 'Bondi Junction', st: 'NSW' }, { p: '2026', s: 'Bondi', st: 'NSW' },
+            { p: '2030', s: 'Dover Heights', st: 'NSW' }, { p: '2031', s: 'Randwick', st: 'NSW' },
+            { p: '2034', s: 'Coogee', st: 'NSW' }, { p: '2035', s: 'Maroubra', st: 'NSW' },
+            { p: '2040', s: 'Leichhardt', st: 'NSW' }, { p: '2041', s: 'Balmain', st: 'NSW' },
+            { p: '2042', s: 'Newtown', st: 'NSW' }, { p: '2050', s: 'Camperdown', st: 'NSW' },
+            { p: '2060', s: 'North Sydney', st: 'NSW' }, { p: '2065', s: 'Crows Nest', st: 'NSW' },
+            { p: '2066', s: 'Lane Cove', st: 'NSW' }, { p: '2067', s: 'Chatswood', st: 'NSW' },
+            { p: '2088', s: 'Mosman', st: 'NSW' }, { p: '2095', s: 'Manly', st: 'NSW' },
+            { p: '2099', s: 'Dee Why', st: 'NSW' }, { p: '2113', s: 'Macquarie Park', st: 'NSW' },
+            { p: '2135', s: 'Strathfield', st: 'NSW' }, { p: '2140', s: 'Homebush', st: 'NSW' },
+            { p: '2145', s: 'Wentworthville', st: 'NSW' }, { p: '2148', s: 'Blacktown', st: 'NSW' },
+            { p: '2150', s: 'Parramatta', st: 'NSW' }, { p: '2153', s: 'Baulkham Hills', st: 'NSW' },
+            { p: '2155', s: 'Kellyville', st: 'NSW' }, { p: '2160', s: 'Merrylands', st: 'NSW' },
+            { p: '2165', s: 'Fairfield', st: 'NSW' }, { p: '2170', s: 'Liverpool', st: 'NSW' },
+            { p: '2190', s: 'Greenacre', st: 'NSW' }, { p: '2193', s: 'Ashbury', st: 'NSW' },
+            { p: '2200', s: 'Bankstown', st: 'NSW' }, { p: '2210', s: 'Peakhurst', st: 'NSW' },
+            { p: '2220', s: 'Hurstville', st: 'NSW' }, { p: '2230', s: 'Cronulla', st: 'NSW' },
+            // NSW - Regional
+            { p: '2250', s: 'Gosford', st: 'NSW' }, { p: '2259', s: 'Wyong', st: 'NSW' },
+            { p: '2261', s: 'The Entrance', st: 'NSW' }, { p: '2300', s: 'Newcastle', st: 'NSW' },
+            { p: '2303', s: 'Hamilton', st: 'NSW' }, { p: '2320', s: 'Maitland', st: 'NSW' },
+            { p: '2324', s: 'Raymond Terrace', st: 'NSW' }, { p: '2330', s: 'Singleton', st: 'NSW' },
+            { p: '2340', s: 'Tamworth', st: 'NSW' }, { p: '2350', s: 'Armidale', st: 'NSW' },
+            { p: '2400', s: 'Moree', st: 'NSW' }, { p: '2430', s: 'Taree', st: 'NSW' },
+            { p: '2444', s: 'Port Macquarie', st: 'NSW' }, { p: '2450', s: 'Coffs Harbour', st: 'NSW' },
+            { p: '2460', s: 'Grafton', st: 'NSW' }, { p: '2470', s: 'Casino', st: 'NSW' },
+            { p: '2477', s: 'Alstonville', st: 'NSW' }, { p: '2478', s: 'Ballina', st: 'NSW' },
+            { p: '2480', s: 'Lismore', st: 'NSW' }, { p: '2481', s: 'Byron Bay', st: 'NSW' },
+            { p: '2484', s: 'Murwillumbah', st: 'NSW' }, { p: '2486', s: 'Tweed Heads', st: 'NSW' },
+            { p: '2500', s: 'Wollongong', st: 'NSW' }, { p: '2529', s: 'Shellharbour', st: 'NSW' },
+            { p: '2530', s: 'Dapto', st: 'NSW' }, { p: '2540', s: 'Vincentia', st: 'NSW' },
+            { p: '2560', s: 'Campbelltown', st: 'NSW' }, { p: '2570', s: 'Camden', st: 'NSW' },
+            { p: '2575', s: 'Mittagong', st: 'NSW' }, { p: '2576', s: 'Bowral', st: 'NSW' },
+            { p: '2577', s: 'Moss Vale', st: 'NSW' }, { p: '2580', s: 'Goulburn', st: 'NSW' },
+            { p: '2620', s: 'Queanbeyan', st: 'NSW' }, { p: '2640', s: 'Albury', st: 'NSW' },
+            { p: '2650', s: 'Wagga Wagga', st: 'NSW' }, { p: '2680', s: 'Griffith', st: 'NSW' },
+            { p: '2700', s: 'Narrandera', st: 'NSW' }, { p: '2710', s: 'Deniliquin', st: 'NSW' },
+            { p: '2730', s: 'Moama', st: 'NSW' }, { p: '2745', s: 'Glenmore Park', st: 'NSW' },
+            { p: '2750', s: 'Penrith', st: 'NSW' }, { p: '2777', s: 'Springwood', st: 'NSW' },
+            { p: '2780', s: 'Katoomba', st: 'NSW' }, { p: '2790', s: 'Lithgow', st: 'NSW' },
+            { p: '2795', s: 'Bathurst', st: 'NSW' }, { p: '2800', s: 'Orange', st: 'NSW' },
+            { p: '2830', s: 'Dubbo', st: 'NSW' }, { p: '2850', s: 'Mudgee', st: 'NSW' },
+            { p: '2870', s: 'Parkes', st: 'NSW' }, { p: '2880', s: 'Broken Hill', st: 'NSW' },
+
+            // VIC - Metro
+            { p: '3000', s: 'Melbourne', st: 'VIC' }, { p: '3002', s: 'East Melbourne', st: 'VIC' },
+            { p: '3003', s: 'West Melbourne', st: 'VIC' }, { p: '3006', s: 'Southbank', st: 'VIC' },
+            { p: '3008', s: 'Docklands', st: 'VIC' }, { p: '3011', s: 'Footscray', st: 'VIC' },
+            { p: '3012', s: 'West Footscray', st: 'VIC' }, { p: '3013', s: 'Yarraville', st: 'VIC' },
+            { p: '3015', s: 'Newport', st: 'VIC' }, { p: '3016', s: 'Williamstown', st: 'VIC' },
+            { p: '3018', s: 'Altona', st: 'VIC' }, { p: '3020', s: 'Sunshine', st: 'VIC' },
+            { p: '3021', s: 'St Albans', st: 'VIC' }, { p: '3023', s: 'Caroline Springs', st: 'VIC' },
+            { p: '3029', s: 'Hoppers Crossing', st: 'VIC' }, { p: '3030', s: 'Werribee', st: 'VIC' },
+            { p: '3031', s: 'Kensington', st: 'VIC' }, { p: '3032', s: 'Ascot Vale', st: 'VIC' },
+            { p: '3038', s: 'Taylors Lakes', st: 'VIC' }, { p: '3039', s: 'Moonee Ponds', st: 'VIC' },
+            { p: '3040', s: 'Essendon', st: 'VIC' }, { p: '3046', s: 'Glenroy', st: 'VIC' },
+            { p: '3047', s: 'Broadmeadows', st: 'VIC' }, { p: '3051', s: 'North Melbourne', st: 'VIC' },
+            { p: '3053', s: 'Carlton', st: 'VIC' }, { p: '3056', s: 'Brunswick', st: 'VIC' },
+            { p: '3058', s: 'Coburg', st: 'VIC' }, { p: '3065', s: 'Fitzroy', st: 'VIC' },
+            { p: '3066', s: 'Collingwood', st: 'VIC' }, { p: '3068', s: 'Clifton Hill', st: 'VIC' },
+            { p: '3070', s: 'Northcote', st: 'VIC' }, { p: '3072', s: 'Preston', st: 'VIC' },
+            { p: '3073', s: 'Reservoir', st: 'VIC' }, { p: '3083', s: 'Bundoora', st: 'VIC' },
+            { p: '3084', s: 'Heidelberg', st: 'VIC' }, { p: '3088', s: 'Greensborough', st: 'VIC' },
+            { p: '3101', s: 'Kew', st: 'VIC' }, { p: '3103', s: 'Balwyn', st: 'VIC' },
+            { p: '3108', s: 'Doncaster', st: 'VIC' }, { p: '3121', s: 'Richmond', st: 'VIC' },
+            { p: '3122', s: 'Hawthorn', st: 'VIC' }, { p: '3124', s: 'Camberwell', st: 'VIC' },
+            { p: '3128', s: 'Box Hill', st: 'VIC' }, { p: '3130', s: 'Blackburn', st: 'VIC' },
+            { p: '3134', s: 'Ringwood', st: 'VIC' }, { p: '3141', s: 'South Yarra', st: 'VIC' },
+            { p: '3142', s: 'Toorak', st: 'VIC' }, { p: '3144', s: 'Malvern', st: 'VIC' },
+            { p: '3145', s: 'Malvern East', st: 'VIC' }, { p: '3146', s: 'Glen Iris', st: 'VIC' },
+            { p: '3149', s: 'Mount Waverley', st: 'VIC' }, { p: '3150', s: 'Glen Waverley', st: 'VIC' },
+            { p: '3152', s: 'Wantirna', st: 'VIC' }, { p: '3160', s: 'Tecoma', st: 'VIC' },
+            { p: '3162', s: 'Caulfield', st: 'VIC' }, { p: '3170', s: 'Mulgrave', st: 'VIC' },
+            { p: '3175', s: 'Dandenong', st: 'VIC' }, { p: '3181', s: 'Prahran', st: 'VIC' },
+            { p: '3182', s: 'St Kilda', st: 'VIC' }, { p: '3184', s: 'Elwood', st: 'VIC' },
+            { p: '3186', s: 'Brighton', st: 'VIC' }, { p: '3191', s: 'Sandringham', st: 'VIC' },
+            { p: '3199', s: 'Frankston', st: 'VIC' }, { p: '3205', s: 'South Melbourne', st: 'VIC' },
+            { p: '3207', s: 'Port Melbourne', st: 'VIC' },
+            // VIC - Regional
+            { p: '3220', s: 'Geelong', st: 'VIC' }, { p: '3216', s: 'Belmont', st: 'VIC' },
+            { p: '3225', s: 'Queenscliff', st: 'VIC' }, { p: '3226', s: 'Ocean Grove', st: 'VIC' },
+            { p: '3228', s: 'Torquay', st: 'VIC' }, { p: '3250', s: 'Colac', st: 'VIC' },
+            { p: '3280', s: 'Warrnambool', st: 'VIC' }, { p: '3300', s: 'Hamilton', st: 'VIC' },
+            { p: '3337', s: 'Melton', st: 'VIC' }, { p: '3350', s: 'Ballarat', st: 'VIC' },
+            { p: '3352', s: 'Wendouree', st: 'VIC' }, { p: '3377', s: 'Ararat', st: 'VIC' },
+            { p: '3400', s: 'Horsham', st: 'VIC' }, { p: '3429', s: 'Sunbury', st: 'VIC' },
+            { p: '3444', s: 'Kyneton', st: 'VIC' }, { p: '3450', s: 'Castlemaine', st: 'VIC' },
+            { p: '3460', s: 'Daylesford', st: 'VIC' }, { p: '3500', s: 'Mildura', st: 'VIC' },
+            { p: '3550', s: 'Bendigo', st: 'VIC' }, { p: '3555', s: 'Kangaroo Flat', st: 'VIC' },
+            { p: '3561', s: 'Rochester', st: 'VIC' }, { p: '3564', s: 'Echuca', st: 'VIC' },
+            { p: '3630', s: 'Shepparton', st: 'VIC' }, { p: '3672', s: 'Benalla', st: 'VIC' },
+            { p: '3677', s: 'Wangaratta', st: 'VIC' }, { p: '3690', s: 'Wodonga', st: 'VIC' },
+            { p: '3757', s: 'Whittlesea', st: 'VIC' }, { p: '3810', s: 'Warragul', st: 'VIC' },
+            { p: '3825', s: 'Moe', st: 'VIC' }, { p: '3840', s: 'Morwell', st: 'VIC' },
+            { p: '3844', s: 'Traralgon', st: 'VIC' }, { p: '3850', s: 'Sale', st: 'VIC' },
+            { p: '3875', s: 'Bairnsdale', st: 'VIC' }, { p: '3909', s: 'Lakes Entrance', st: 'VIC' },
+            { p: '3931', s: 'Mornington', st: 'VIC' }, { p: '3936', s: 'Dromana', st: 'VIC' },
+            { p: '3939', s: 'Rosebud', st: 'VIC' }, { p: '3953', s: 'Leongatha', st: 'VIC' },
+
+            // QLD - Metro
+            { p: '4000', s: 'Brisbane City', st: 'QLD' }, { p: '4005', s: 'New Farm', st: 'QLD' },
+            { p: '4006', s: 'Fortitude Valley', st: 'QLD' }, { p: '4007', s: 'Ascot', st: 'QLD' },
+            { p: '4030', s: 'Lutwyche', st: 'QLD' }, { p: '4032', s: 'Chermside', st: 'QLD' },
+            { p: '4034', s: 'Aspley', st: 'QLD' }, { p: '4053', s: 'Everton Park', st: 'QLD' },
+            { p: '4064', s: 'Milton', st: 'QLD' }, { p: '4066', s: 'Toowong', st: 'QLD' },
+            { p: '4068', s: 'Indooroopilly', st: 'QLD' }, { p: '4069', s: 'Kenmore', st: 'QLD' },
+            { p: '4074', s: 'Jindalee', st: 'QLD' }, { p: '4075', s: 'Oxley', st: 'QLD' },
+            { p: '4101', s: 'West End', st: 'QLD' }, { p: '4102', s: 'Woolloongabba', st: 'QLD' },
+            { p: '4105', s: 'Moorooka', st: 'QLD' }, { p: '4109', s: 'Sunnybank', st: 'QLD' },
+            { p: '4122', s: 'Mount Gravatt', st: 'QLD' }, { p: '4127', s: 'Springwood', st: 'QLD' },
+            { p: '4132', s: 'Crestmead', st: 'QLD' }, { p: '4151', s: 'Coorparoo', st: 'QLD' },
+            { p: '4152', s: 'Carina', st: 'QLD' }, { p: '4169', s: 'Kangaroo Point', st: 'QLD' },
+            { p: '4170', s: 'Cannon Hill', st: 'QLD' }, { p: '4171', s: 'Bulimba', st: 'QLD' },
+            { p: '4178', s: 'Wynnum', st: 'QLD' }, { p: '4179', s: 'Manly', st: 'QLD' },
+            { p: '4207', s: 'Beenleigh', st: 'QLD' }, { p: '4211', s: 'Nerang', st: 'QLD' },
+            { p: '4215', s: 'Southport', st: 'QLD' }, { p: '4217', s: 'Surfers Paradise', st: 'QLD' },
+            { p: '4218', s: 'Broadbeach', st: 'QLD' }, { p: '4220', s: 'Burleigh Heads', st: 'QLD' },
+            { p: '4221', s: 'Palm Beach', st: 'QLD' }, { p: '4223', s: 'Currumbin', st: 'QLD' },
+            { p: '4225', s: 'Coolangatta', st: 'QLD' }, { p: '4300', s: 'Ipswich', st: 'QLD' },
+            { p: '4305', s: 'Brassall', st: 'QLD' }, { p: '4306', s: 'Amberley', st: 'QLD' },
+            // QLD - Regional
+            { p: '4350', s: 'Toowoomba', st: 'QLD' }, { p: '4370', s: 'Warwick', st: 'QLD' },
+            { p: '4380', s: 'Stanthorpe', st: 'QLD' }, { p: '4390', s: 'Goondiwindi', st: 'QLD' },
+            { p: '4405', s: 'Dalby', st: 'QLD' }, { p: '4455', s: 'Roma', st: 'QLD' },
+            { p: '4470', s: 'Charleville', st: 'QLD' }, { p: '4500', s: 'Strathpine', st: 'QLD' },
+            { p: '4503', s: 'Kallangur', st: 'QLD' }, { p: '4504', s: 'Narangba', st: 'QLD' },
+            { p: '4506', s: 'Moorayfield', st: 'QLD' }, { p: '4508', s: 'Deception Bay', st: 'QLD' },
+            { p: '4510', s: 'Caboolture', st: 'QLD' }, { p: '4551', s: 'CaloundRA', st: 'QLD' },
+            { p: '4556', s: 'Buderim', st: 'QLD' }, { p: '4557', s: 'Mooloolaba', st: 'QLD' },
+            { p: '4558', s: 'Maroochydore', st: 'QLD' }, { p: '4560', s: 'Nambour', st: 'QLD' },
+            { p: '4567', s: 'Noosa Heads', st: 'QLD' }, { p: '4570', s: 'Gympie', st: 'QLD' },
+            { p: '4650', s: 'Maryborough', st: 'QLD' }, { p: '4655', s: 'Hervey Bay', st: 'QLD' },
+            { p: '4670', s: 'Bundaberg', st: 'QLD' }, { p: '4680', s: 'Gladstone', st: 'QLD' },
+            { p: '4700', s: 'Rockhampton', st: 'QLD' }, { p: '4703', s: 'Yeppoon', st: 'QLD' },
+            { p: '4720', s: 'Emerald', st: 'QLD' }, { p: '4740', s: 'Mackay', st: 'QLD' },
+            { p: '4800', s: 'Proserpine', st: 'QLD' }, { p: '4802', s: 'Airlie Beach', st: 'QLD' },
+            { p: '4807', s: 'Bowen', st: 'QLD' }, { p: '4810', s: 'Townsville', st: 'QLD' },
+            { p: '4814', s: 'Aitkenvale', st: 'QLD' }, { p: '4817', s: 'Kirwan', st: 'QLD' },
+            { p: '4820', s: 'Charters Towers', st: 'QLD' }, { p: '4825', s: 'Mount Isa', st: 'QLD' },
+            { p: '4850', s: 'Ingham', st: 'QLD' }, { p: '4860', s: 'Innisfail', st: 'QLD' },
+            { p: '4870', s: 'Cairns', st: 'QLD' }, { p: '4879', s: 'Clifton Beach', st: 'QLD' },
+            { p: '4881', s: 'Palm Cove', st: 'QLD' }, { p: '4883', s: 'Mareeba', st: 'QLD' },
+
+            // WA - Metro
+            { p: '6000', s: 'Perth', st: 'WA' }, { p: '6003', s: 'Highgate', st: 'WA' },
+            { p: '6004', s: 'East Perth', st: 'WA' }, { p: '6005', s: 'West Perth', st: 'WA' },
+            { p: '6008', s: 'Subiaco', st: 'WA' }, { p: '6009', s: 'Nedlands', st: 'WA' },
+            { p: '6010', s: 'Claremont', st: 'WA' }, { p: '6011', s: 'Cottesloe', st: 'WA' },
+            { p: '6014', s: 'Floreat', st: 'WA' }, { p: '6018', s: 'Karrinyup', st: 'WA' },
+            { p: '6019', s: 'Scarborough', st: 'WA' }, { p: '6021', s: 'Balcatta', st: 'WA' },
+            { p: '6025', s: 'Craigie', st: 'WA' }, { p: '6027', s: 'Joondalup', st: 'WA' },
+            { p: '6050', s: 'Mount Lawley', st: 'WA' }, { p: '6051', s: 'Maylands', st: 'WA' },
+            { p: '6054', s: 'Bassendean', st: 'WA' }, { p: '6056', s: 'Midland', st: 'WA' },
+            { p: '6060', s: 'Joondanna', st: 'WA' }, { p: '6065', s: 'Wangara', st: 'WA' },
+            { p: '6090', s: 'Malaga', st: 'WA' }, { p: '6100', s: 'Victoria Park', st: 'WA' },
+            { p: '6102', s: 'Bentley', st: 'WA' }, { p: '6107', s: 'Cannington', st: 'WA' },
+            { p: '6110', s: 'Gosnells', st: 'WA' }, { p: '6147', s: 'Willetton', st: 'WA' },
+            { p: '6150', s: 'Murdoch', st: 'WA' }, { p: '6155', s: 'Canning Vale', st: 'WA' },
+            { p: '6160', s: 'Fremantle', st: 'WA' }, { p: '6163', s: 'Spearwood', st: 'WA' },
+            { p: '6168', s: 'Rockingham', st: 'WA' }, { p: '6169', s: 'Safety Bay', st: 'WA' },
+            // WA - Regional
+            { p: '6210', s: 'Mandurah', st: 'WA' }, { p: '6215', s: 'Waroona', st: 'WA' },
+            { p: '6230', s: 'Bunbury', st: 'WA' }, { p: '6280', s: 'Busselton', st: 'WA' },
+            { p: '6281', s: 'Dunsborough', st: 'WA' }, { p: '6285', s: 'Margaret River', st: 'WA' },
+            { p: '6300', s: 'York', st: 'WA' }, { p: '6330', s: 'Albany', st: 'WA' },
+            { p: '6401', s: 'Northam', st: 'WA' }, { p: '6430', s: 'Kalgoorlie', st: 'WA' },
+            { p: '6450', s: 'Esperance', st: 'WA' }, { p: '6530', s: 'Geraldton', st: 'WA' },
+            { p: '6603', s: 'Moora', st: 'WA' }, { p: '6701', s: 'Carnarvon', st: 'WA' },
+            { p: '6714', s: 'Karratha', st: 'WA' }, { p: '6721', s: 'Port Hedland', st: 'WA' },
+            { p: '6722', s: 'South Hedland', st: 'WA' }, { p: '6725', s: 'Broome', st: 'WA' },
+            { p: '6743', s: 'Kununurra', st: 'WA' }, { p: '6770', s: 'Halls Creek', st: 'WA' },
+
+            // SA
+            { p: '5000', s: 'Adelaide', st: 'SA' }, { p: '5006', s: 'North Adelaide', st: 'SA' },
+            { p: '5008', s: 'Croydon', st: 'SA' }, { p: '5015', s: 'Port Adelaide', st: 'SA' },
+            { p: '5022', s: 'Henley Beach', st: 'SA' }, { p: '5031', s: 'Mile End', st: 'SA' },
+            { p: '5034', s: 'Unley', st: 'SA' }, { p: '5045', s: 'Glenelg', st: 'SA' },
+            { p: '5048', s: 'Brighton', st: 'SA' }, { p: '5050', s: 'Blackwood', st: 'SA' },
+            { p: '5052', s: 'Belair', st: 'SA' }, { p: '5061', s: 'Hyde Park', st: 'SA' },
+            { p: '5063', s: 'Parkside', st: 'SA' }, { p: '5067', s: 'Norwood', st: 'SA' },
+            { p: '5070', s: 'Payneham', st: 'SA' }, { p: '5074', s: 'Campbelltown', st: 'SA' },
+            { p: '5082', s: 'Prospect', st: 'SA' }, { p: '5086', s: 'Oakden', st: 'SA' },
+            { p: '5092', s: 'Modbury', st: 'SA' }, { p: '5095', s: 'Mawson Lakes', st: 'SA' },
+            { p: '5108', s: 'Salisbury', st: 'SA' }, { p: '5112', s: 'Elizabeth', st: 'SA' },
+            { p: '5118', s: 'Gawler', st: 'SA' }, { p: '5153', s: 'Ironbank', st: 'SA' },
+            { p: '5159', s: 'Aberfoyle Park', st: 'SA' }, { p: '5162', s: 'Morphett Vale', st: 'SA' },
+            { p: '5168', s: 'Noarlunga Centre', st: 'SA' }, { p: '5173', s: 'Aldinga Beach', st: 'SA' },
+            { p: '5211', s: 'Victor Harbor', st: 'SA' }, { p: '5251', s: 'Mount Barker', st: 'SA' },
+            { p: '5253', s: 'Murray Bridge', st: 'SA' }, { p: '5290', s: 'Mount Gambier', st: 'SA' },
+            { p: '5333', s: 'Loxton', st: 'SA' }, { p: '5341', s: 'Renmark', st: 'SA' },
+            { p: '5343', s: 'Berri', st: 'SA' }, { p: '5353', s: 'Nuriootpa', st: 'SA' },
+            { p: '5371', s: 'Tanunda', st: 'SA' }, { p: '5460', s: 'Clare', st: 'SA' },
+            { p: '5540', s: 'Port Pirie', st: 'SA' }, { p: '5600', s: 'Whyalla', st: 'SA' },
+            { p: '5606', s: 'Port Lincoln', st: 'SA' }, { p: '5700', s: 'Port Augusta', st: 'SA' },
+            { p: '5710', s: 'Woomera', st: 'SA' }, { p: '5725', s: 'Roxby Downs', st: 'SA' },
+            { p: '5730', s: 'Coober Pedy', st: 'SA' },
+
+            // TAS
+            { p: '7000', s: 'Hobart', st: 'TAS' }, { p: '7004', s: 'Battery Point', st: 'TAS' },
+            { p: '7005', s: 'Sandy Bay', st: 'TAS' }, { p: '7008', s: 'New Town', st: 'TAS' },
+            { p: '7009', s: 'Moonah', st: 'TAS' }, { p: '7010', s: 'Glenorchy', st: 'TAS' },
+            { p: '7011', s: 'Berriedale', st: 'TAS' }, { p: '7015', s: 'Lindisfarne', st: 'TAS' },
+            { p: '7018', s: 'Bellerive', st: 'TAS' }, { p: '7050', s: 'Kingston', st: 'TAS' },
+            { p: '7109', s: 'Huonville', st: 'TAS' }, { p: '7140', s: 'New Norfolk', st: 'TAS' },
+            { p: '7170', s: 'Cambridge', st: 'TAS' }, { p: '7172', s: 'Sorell', st: 'TAS' },
+            { p: '7190', s: 'Orford', st: 'TAS' }, { p: '7212', s: 'Campbell Town', st: 'TAS' },
+            { p: '7215', s: 'St Helens', st: 'TAS' }, { p: '7250', s: 'Launceston', st: 'TAS' },
+            { p: '7260', s: 'Mowbray', st: 'TAS' }, { p: '7277', s: 'Legana', st: 'TAS' },
+            { p: '7301', s: 'Longford', st: 'TAS' }, { p: '7304', s: 'Deloraine', st: 'TAS' },
+            { p: '7310', s: 'Devonport', st: 'TAS' }, { p: '7315', s: 'Ulverstone', st: 'TAS' },
+            { p: '7320', s: 'Burnie', st: 'TAS' }, { p: '7321', s: 'Somerset', st: 'TAS' },
+            { p: '7325', s: 'Wynyard', st: 'TAS' }, { p: '7330', s: 'Smithton', st: 'TAS' },
+            { p: '7468', s: 'Strahan', st: 'TAS' }, { p: '7470', s: 'Rosebery', st: 'TAS' },
+
+            // ACT
+            { p: '2600', s: 'Canberra', st: 'ACT' }, { p: '2600', s: 'Barton', st: 'ACT' },
+            { p: '2602', s: 'Ainslie', st: 'ACT' }, { p: '2602', s: 'Dickson', st: 'ACT' },
+            { p: '2603', s: 'Manuka', st: 'ACT' }, { p: '2603', s: 'Red Hill', st: 'ACT' },
+            { p: '2604', s: 'Kingston', st: 'ACT' }, { p: '2605', s: 'Curtin', st: 'ACT' },
+            { p: '2606', s: 'Phillip', st: 'ACT' }, { p: '2607', s: 'Mawson', st: 'ACT' },
+            { p: '2611', s: 'Weston', st: 'ACT' }, { p: '2612', s: 'Braddon', st: 'ACT' },
+            { p: '2614', s: 'Hawker', st: 'ACT' }, { p: '2615', s: 'Kippax', st: 'ACT' },
+            { p: '2617', s: 'Belconnen', st: 'ACT' }, { p: '2617', s: 'Bruce', st: 'ACT' },
+            { p: '2620', s: 'Hume', st: 'ACT' }, { p: '2900', s: 'Tuggeranong', st: 'ACT' },
+            { p: '2902', s: 'Kambah', st: 'ACT' }, { p: '2904', s: 'Fadden', st: 'ACT' },
+            { p: '2905', s: 'Calwell', st: 'ACT' }, { p: '2913', s: 'Gungahlin', st: 'ACT' },
+            { p: '2914', s: 'Amaroo', st: 'ACT' },
+
+            // NT
+            { p: '0800', s: 'Darwin', st: 'NT' }, { p: '0810', s: 'Casuarina', st: 'NT' },
+            { p: '0810', s: 'Nightcliff', st: 'NT' }, { p: '0812', s: 'Anula', st: 'NT' },
+            { p: '0820', s: 'Parap', st: 'NT' }, { p: '0820', s: 'Fannie Bay', st: 'NT' },
+            { p: '0822', s: 'Errimba', st: 'NT' }, { p: '0828', s: 'Berrimah', st: 'NT' },
+            { p: '0830', s: 'Palmerston', st: 'NT' }, { p: '0832', s: 'Bakewell', st: 'NT' },
+            { p: '0835', s: 'Humpty Doo', st: 'NT' }, { p: '0836', s: 'Noonamah', st: 'NT' },
+            { p: '0837', s: 'Batchelor', st: 'NT' }, { p: '0850', s: 'Katherine', st: 'NT' },
+            { p: '0852', s: 'Tindal', st: 'NT' }, { p: '0860', s: 'Tennant Creek', st: 'NT' },
+            { p: '0870', s: 'Alice Springs', st: 'NT' }, { p: '0872', s: 'Uluru', st: 'NT' },
+            // Additional entries for 0872 to demonstrate multi-suburb postcode
+            { p: '0872', s: 'Mutitjulu', st: 'NT' }, { p: '0872', s: 'Kintore', st: 'NT' },
+            { p: '0872', s: 'Finke', st: 'NT' }, { p: '0872', s: 'Docker River', st: 'NT' },
+            { p: '0872', s: 'Nyirripi', st: 'NT' }, { p: '0872', s: 'Papunya', st: 'NT' },
+            { p: '0872', s: 'Yuendumu', st: 'NT' }, { p: '0872', s: 'Hermannsburg', st: 'NT' },
+            { p: '0872', s: 'Santa Teresa', st: 'NT' }, { p: '0872', s: 'Titjikala', st: 'NT' },
+            { p: '0872', s: 'Yulara', st: 'NT' }, { p: '0872', s: 'Walungurru', st: 'NT' },
+            { p: '0880', s: 'Nhulunbuy', st: 'NT' }, { p: '0886', s: 'Jabiru', st: 'NT' }
+        ];
+
+        function RegionalSelector() {
+            const [isNationwide, setIsNationwide] = useState(false);
+            const [selectedStates, setSelectedStates] = useState([]);
+            const [selectedAcprs, setSelectedAcprs] = useState([]);
+            const [selectedSuburbs, setSelectedSuburbs] = useState([]);
+            
+            const [suburbInput, setSuburbInput] = useState('');
+            const [filteredSuburbs, setFilteredSuburbs] = useState([]);
+
+            // New state for ACPR search
+            const [acprSearch, setAcprSearch] = useState('');
+
+            // --- Logic: Redundancy Handling ---
+
+            // 1. Add State Logic
+            const toggleState = (stateCode) => {
+                if (selectedStates.includes(stateCode)) {
+                    setSelectedStates(prev => prev.filter(s => s !== stateCode));
+                } else {
+                    setSelectedStates(prev => [...prev, stateCode]);
+                    // Active De-duplication. If State is added, remove its children.
+                    setSelectedAcprs(prev => prev.filter(acpr => acpr.state !== stateCode));
+                    setSelectedSuburbs(prev => prev.filter(sub => sub.st !== stateCode));
+                }
+            };
+
+            // 2. Add ACPR Logic
+            const toggleAcpr = (acpr) => {
+                const isSelected = selectedAcprs.some(a => a.id === acpr.id);
+                if (isSelected) {
+                    setSelectedAcprs(prev => prev.filter(a => a.id !== acpr.id));
+                } else {
+                    // If the parent State is already selected, this is redundant. 
+                    if (selectedStates.includes(acpr.state)) return; 
+                    
+                    setSelectedAcprs(prev => [...prev, acpr]);
+                }
+            };
+
+            // 3. Add Suburb Logic
+            const addSuburb = (suburb) => {
+                // Check redundancy
+                if (selectedStates.includes(suburb.st)) return; 
+                // Check duplication
+                if (selectedSuburbs.some(s => s.p === suburb.p && s.s === suburb.s)) return;
+
+                setSelectedSuburbs(prev => [...prev, suburb]);
+                setSuburbInput('');
+                setFilteredSuburbs([]);
+            };
+
+            const removeSuburb = (suburbString) => {
+                setSelectedSuburbs(prev => prev.filter(s => `${s.s} ${s.p}` !== suburbString));
+            };
+
+            // ACPR Filtering and Sorting Logic
+            const filteredAcprs = useMemo(() => {
+                let data = ALL_ACPRS;
+                if (acprSearch) {
+                    const lower = acprSearch.toLowerCase();
+                    data = data.filter(item => 
+                        item.label.toLowerCase().includes(lower) || 
+                        item.state.toLowerCase().includes(lower)
+                    );
+                }
+                // Sort alphabetically by Label
+                return [...data].sort((a, b) => a.label.localeCompare(b.label));
+            }, [acprSearch]);
+
+            // Search logic
+            useEffect(() => {
+                if (suburbInput.length < 2) {
+                    setFilteredSuburbs([]);
+                    return;
+                }
+                const term = suburbInput.toLowerCase();
+                const results = EXTENDED_SUBURBS.filter(s => 
+                    s.s.toLowerCase().includes(term) || s.p.startsWith(term)
+                );
+                // Limit results for performance in dropdown
+                setFilteredSuburbs(results.slice(0, 100));
+            }, [suburbInput]);
+
+
+            // --- Derived State for UI ---
+            const partialStates = useMemo(() => {
+                const states = new Set();
+                selectedAcprs.forEach(a => states.add(a.state));
+                selectedSuburbs.forEach(s => states.add(s.st));
+                return states;
+            }, [selectedAcprs, selectedSuburbs]);
+
+            const handleNationwideChange = () => {
+                setIsNationwide(!isNationwide);
+                if (!isNationwide) {
+                    setSelectedStates([]);
+                    setSelectedAcprs([]);
+                    setSelectedSuburbs([]);
+                }
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto p-6 bg-slate-50 min-h-screen font-sans text-slate-900">
+                    
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-300 overflow-hidden">
+                        {/* Header */}
+                        <div className="px-6 py-4 border-b border-slate-300 bg-slate-100 flex justify-between items-center">
+                            <div>
+                                <h2 className="text-lg font-semibold text-slate-900">Regional Coverage Selector</h2>
+                                <p className="text-sm text-slate-600">Define geographic parameters for report generation.</p>
+                            </div>
+                            
+                            {/* Nationwide Toggle */}
+                            <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-slate-400 shadow-sm">
+                                <span className={`text-sm font-medium ${isNationwide ? 'text-blue-700' : 'text-slate-700'}`}>
+                                    Nationwide (All Australia)
+                                </span>
+                                <button 
+                                    onClick={handleNationwideChange}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isNationwide ? 'bg-blue-600' : 'bg-slate-300'}`}
+                                >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isNationwide ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Main Interface Body */}
+                        <div className={`p-6 grid grid-cols-1 md:grid-cols-12 gap-6 relative transition-opacity duration-200 ${isNationwide ? 'opacity-50 pointer-events-none select-none' : 'opacity-100'}`}>
+                            
+                            {/* Column 1: States */}
+                            <div className="md:col-span-3 border-r border-slate-300 pr-4">
+                                <h3 className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-2">
+                                    <MapIcon size={14} /> 1. State / Territory
+                                </h3>
+                                <div className="space-y-2">
+                                    {MOCK_STATES.map(state => {
+                                        const isSelected = selectedStates.includes(state.code);
+                                        const isPartial = !isSelected && partialStates.has(state.code);
+                                        
+                                        return (
+                                            <div key={state.code} className="flex items-center">
+                                                <button
+                                                    onClick={() => toggleState(state.code)}
+                                                    className={`w-full flex items-center justify-between p-2 rounded text-left text-sm transition-colors ${
+                                                        isSelected 
+                                                            ? 'bg-blue-50 text-blue-800 border border-blue-300' 
+                                                            : 'hover:bg-slate-50 border border-transparent'
+                                                    }`}
+                                                >
+                                                    <span className="flex items-center gap-2 text-slate-800">
+                                                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                                            isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-400 bg-white'
+                                                        }`}>
+                                                            {isSelected && <Check size={10} className="text-white" />}
+                                                            {isPartial && !isSelected && <div className="w-2 h-0.5 bg-blue-500" />}
+                                                        </div>
+                                                        {state.label}
+                                                    </span>
+                                                    {isSelected && <span className="text-xs font-bold bg-blue-100 px-1.5 py-0.5 rounded text-blue-800">All</span>}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Column 2: ACPRs */}
+                            <div className="md:col-span-4 border-r border-slate-300 px-4">
+                                <h3 className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-2">
+                                    <MapPin size={14} /> 2. Aged Care Planning Region
+                                </h3>
+
+                                {/* ACPR Search Input */}
+                                <div className="relative mb-2">
+                                    <input
+                                        type="text"
+                                        value={acprSearch}
+                                        onChange={(e) => setAcprSearch(e.target.value)}
+                                        placeholder="Search Regions..."
+                                        className="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-400 rounded-md focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-800 placeholder-slate-500"
+                                    />
+                                    <Search size={14} className="absolute left-2.5 top-2 text-slate-500" />
+                                </div>
+                                
+                                <div className="bg-white border border-slate-300 rounded-lg h-[280px] overflow-y-auto">
+                                    {filteredAcprs.map(acpr => {
+                                        const isParentStateSelected = selectedStates.includes(acpr.state);
+                                        const isSelected = selectedAcprs.some(a => a.id === acpr.id);
+                                        
+                                        if (isParentStateSelected) {
+                                            return (
+                                                <div key={acpr.id} className="p-2 text-sm text-slate-500 italic bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                                                    {acpr.label}
+                                                    <span className="text-xs">Included in {acpr.state}</span>
+                                                </div>
+                                            )
+                                        }
+
+                                        return (
+                                            <button
+                                                key={acpr.id}
+                                                onClick={() => toggleAcpr(acpr)}
+                                                className={`w-full text-left p-2 border-b border-slate-200 text-sm flex items-center justify-between hover:bg-slate-50 ${isSelected ? 'bg-indigo-50 text-indigo-800' : 'text-slate-800'}`}
+                                            >
+                                                <span>{acpr.label} <span className="text-slate-500 ml-1">({acpr.state})</span></span>
+                                                {isSelected && <Check size={14} className="text-indigo-600" />}
+                                            </button>
+                                        );
+                                    })}
+                                    {filteredAcprs.length === 0 && (
+                                        <div className="p-4 text-center text-sm text-slate-500 italic">
+                                            No regions found matching "{acprSearch}"
+                                        </div>
+                                    )}
+                                </div>
+                                <p className="text-xs text-slate-500 mt-2">Selection includes all suburbs within region.</p>
+                            </div>
+
+                            {/* Column 3: Suburbs/Postcodes */}
+                            <div className="md:col-span-5 pl-4">
+                                <h3 className="text-xs font-bold text-slate-600 mb-3 flex items-center gap-2">
+                                    <MapPin size={14} /> 3. Suburb / Postcode
+                                </h3>
+                                
+                                <div className="relative">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search Suburb or Postcode..." 
+                                        className="w-full border border-slate-400 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-slate-800 placeholder-slate-500"
+                                        value={suburbInput}
+                                        onChange={(e) => setSuburbInput(e.target.value)}
+                                    />
+                                    
+                                    {/* Autocomplete Dropdown */}
+                                    {(filteredSuburbs.length > 0 || (suburbInput.length >= 2 && filteredSuburbs.length === 0)) && (
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-300 rounded-md shadow-lg z-10 max-h-60 overflow-y-auto">
+                                            {filteredSuburbs.length === 0 ? (
+                                                <div className="px-3 py-2 text-sm text-slate-500 italic">No results found in test database</div>
+                                            ) : (
+                                                filteredSuburbs.map((sub, idx) => {
+                                                    const isParentStateSelected = selectedStates.includes(sub.st);
+                                                    return (
+                                                        <button 
+                                                            key={`${sub.p}-${sub.s}-${idx}`}
+                                                            disabled={isParentStateSelected}
+                                                            onClick={() => addSuburb(sub)}
+                                                            className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 border-b border-slate-200 last:border-0 flex justify-between ${isParentStateSelected ? 'opacity-50 cursor-not-allowed bg-slate-50 text-slate-500' : 'text-slate-800'}`}
+                                                        >
+                                                            <span>{sub.s}, {sub.st} {sub.p}</span>
+                                                            {isParentStateSelected && <span className="text-xs text-slate-500">Included in State</span>}
+                                                        </button>
+                                                    )
+                                                })
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-4 max-h-[260px] overflow-y-auto pr-2">
+                                    {/* Suburb List Display */}
+                                    {selectedSuburbs.length === 0 && (
+                                        <div className="text-sm text-slate-500 text-center py-8 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center gap-2">
+                                            <Database size={24} className="text-slate-400" />
+                                            <span>No individual suburbs selected.</span>
+                                            <span className="text-xs text-slate-400">Test DB contains ~350 suburbs</span>
+                                        </div>
+                                    )}
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedSuburbs.map((s, idx) => (
+                                            <span key={`${s.s}-${s.p}`} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-white border border-slate-400 text-slate-800 shadow-sm">
+                                                {s.s} {s.p}
+                                                <button onClick={() => removeSuburb(`${s.s} ${s.p}`)} className="text-slate-500 hover:text-red-600 transition-colors">
+                                                    <X size={12} />
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer / Results Summary */}
+                        <div className="bg-slate-800 text-slate-200 p-6">
+                            <h3 className="text-xs font-bold text-slate-400 mb-4">Final Selection Output</h3>
+                            
+                            <div className="bg-slate-900 rounded-lg p-4 border border-slate-600 min-h-[100px]">
+                                {isNationwide ? (
+                                    <div className="flex items-center justify-between gap-3 text-green-400 font-medium p-2 bg-slate-800/50 rounded border border-green-900">
+                                        <div className="flex items-center gap-2">
+                                            <Globe size={20} />
+                                            <span>Nationwide (All States, Territories, and Regions included)</span>
+                                        </div>
+                                        <button onClick={handleNationwideChange} className="hover:text-white transition-colors">
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                ) : (selectedStates.length === 0 && selectedAcprs.length === 0 && selectedSuburbs.length === 0) ? (
+                                    <span className="text-slate-500 italic">No selection criteria defined.</span>
+                                ) : (
+                                    <div className="space-y-4">
+                                        
+                                        {/* 1. Full States */}
+                                        {selectedStates.length > 0 && (
+                                            <div>
+                                                <span className="text-slate-400 text-xs block mb-1">States / Territories (Full Coverage):</span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedStates.map(code => (
+                                                        <span key={code} className="bg-blue-900 text-blue-100 border border-blue-600 px-3 py-1 rounded text-sm font-medium flex items-center gap-2">
+                                                            {MOCK_STATES.find(s => s.code === code)?.label}
+                                                            <button onClick={() => toggleState(code)} className="hover:text-white text-blue-300 transition-colors">
+                                                                <X size={14} />
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* 2. ACPRs */}
+                                        {selectedAcprs.length > 0 && (
+                                            <div>
+                                                <span className="text-slate-400 text-xs block mb-1">Aged Care Planning Regions:</span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedAcprs.map(acpr => (
+                                                        <span key={acpr.id} className="bg-indigo-900 text-indigo-100 border border-indigo-600 px-3 py-1 rounded text-sm font-medium flex items-center gap-2">
+                                                            {acpr.label} ({acpr.state})
+                                                            <button onClick={() => toggleAcpr(acpr)} className="hover:text-white text-indigo-300 transition-colors">
+                                                                <X size={14} />
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* 3. Suburbs */}
+                                        {selectedSuburbs.length > 0 && (
+                                            <div>
+                                                <span className="text-slate-400 text-xs block mb-1">Individual Locations:</span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedSuburbs.map((sub, idx) => (
+                                                        <span key={idx} className="bg-slate-700 text-slate-100 border border-slate-500 px-3 py-1 rounded text-sm font-medium flex items-center gap-2">
+                                                            {sub.s}, {sub.st} {sub.p}
+                                                            <button onClick={() => removeSuburb(`${sub.s} ${sub.p}`)} className="hover:text-white text-slate-400 transition-colors">
+                                                                <X size={14} />
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<RegionalSelector />);
+    </script>
+</body>
+</html>
